@@ -1,0 +1,11 @@
+FROM alpine
+
+RUN apk update --no-cache && apk add git
+
+#WORKDIR /data
+
+#VOLUME /data
+
+COPY ./entrypoint.sh /tmp
+RUN chmod u+x /tmp/entrypoint.sh
+ENTRYPOINT ["/tmp/entrypoint.sh"]
