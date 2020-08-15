@@ -1,0 +1,20 @@
+FROM alpine
+
+
+# Install dependencies required to git clone.
+
+RUN apk --update add git less openssh && \
+    rm -rf /var/lib/apt/lists/* && \
+        rm /var/cache/apk/*
+        
+        # Create workdir
+        WORKDIR /apitests
+        
+        # Create volume
+        VOLUME /apitests
+        
+        #Create entrypoint
+        ENTRYPOINT ["git", "clone"]
+        
+        # Clone from git
+        CMD ["https://github.com/onlyillusion/homework.git"]
