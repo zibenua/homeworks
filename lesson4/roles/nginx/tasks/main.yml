@@ -1,0 +1,51 @@
+- name: Install Nginx
+  package:
+    name: nginx
+    state: latest
+
+
+- name: enable service httpd and ensure it is not masked
+  systemd:
+    name: nginx
+    enabled: yes
+    masked: no
+
+- name: Make sure a service is running
+  systemd:
+    state: started
+    name: nginx
+
+
+- name: Replace NGINX config
+  template: 
+    src: templates/nginx.conf
+    dest: /etc/nginx/nginx.conf
+  notify: 
+    - NGINX reload
+  tags: nginx-config
+
+- name: Add NGINX virtualhost config
+  template:
+    src: templates/nginx_vhost.conf
+    dest: /etc/nginx/sites-available/{{ hostname }}.conf
+    mode: '0644'
+  notify: 
+    - NGINX reload
+  tags: nginx-config
+
+- name: Create symbolic link 
+  file:
+    src: /etc/nginx/sites-available/{{ hostname }}.conf
+    dest: /etc/nginx/sites-enabled/{{ hostname }}.conf
+    state: link
+  notify: 
+    - NGINX reload
+  tags: nginx-config
+
+- name: Remove symlink
+  file:
+   path: "/etc/nginx/sites-enabled/default"
+   state: absent
+  notify: 
+    - NGINX reload
+  tags: nginx-config

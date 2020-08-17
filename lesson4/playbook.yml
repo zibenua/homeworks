@@ -1,0 +1,17 @@
+- hosts: web
+  become: true
+  tasks:
+  - name: ensure mc is at the latest version
+    package:
+      name: mc
+      state: latest
+  tags: mc
+
+- hosts: web
+  become: true
+  tasks:
+  - name: ensure git is at the latest version
+    package:
+      name: git
+      state: latest
+  tags: git

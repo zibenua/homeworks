@@ -1,0 +1,6 @@
+[web]
+95.217.180.56 hostname=ansible-managedu.ziben.in.ua db_name=aircooler db_user=aircooler db_password=L4jyiMaEwywC7GeB
+
+[web:vars] 
+upstream_name=google
+upstream_url=google.com

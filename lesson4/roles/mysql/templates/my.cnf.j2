@@ -1,0 +1,62 @@
+[client]
+port                        = 3306
+socket                      = /var/run/mysqld/mysqld.sock
+
+[mysqld_safe]
+socket                      = /var/run/mysqld/mysqld.sock
+nice                        = 0
+
+[mysqld]
+user                        = mysql
+pid-file                    = /var/run/mysqld/mysqld.pid
+socket                      = /var/run/mysqld/mysqld.sock
+port                        = {{ mysql_port }}
+basedir                     = /usr
+datadir                     = /var/lib/mysql
+tmpdir                      = /tmp
+language                    = /usr/share/mysql/english
+old_passwords               = 0
+bind-address                = {{ mysql_bind_address }}
+
+skip-external-locking
+
+max_allowed_packet          = 16M
+key_buffer_size             = 16M
+
+{% if ansible_memory_mb.real.total < 1000 %}
+innodb_buffer_pool_size     = 512M
+{% elif ansible_memory_mb.real.total < 2000 %}
+innodb_buffer_pool_size     = 1024M
+{% elif ansible_memory_mb.real.total < 4000 %}
+innodb_buffer_pool_size     = 2048M
+{% else %}
+innodb_buffer_pool_size     = 8096M
+{% endif %}
+
+
+innodb_file_per_table       = 1
+innodb_flush_method         = O_DIRECT
+innodb_flush_log_at_trx_commit  = 0
+
+{% if ansible_memory_mb.real.total < 1000 %}
+max_connections             = 132
+{% elif ansible_memory_mb.real.total < 2000 %}
+max_connections             = 136
+{% elif ansible_memory_mb.real.total < 4000 %}
+max_connections             = 144
+{% else %}
+max_connections             = 192
+{% endif %}
+
+	query_cache_size            = 0
+
+slow_query_log              = /var/log/mysql/mysql-slow.log
+long_query_time             = 1
+
+expire_logs_days            = 10
+max_binlog_size             = 100M
+
+[mysqldump]
+quick
+quote-names
+max_allowed_packet          = 16M
