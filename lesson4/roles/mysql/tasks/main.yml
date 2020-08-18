@@ -1,0 +1,57 @@
+    - name: Install MySQL
+      package: name={{ item }} state=latest
+      with_items:
+        - mysql-server
+        - python-mysqldb
+      tags: mysql
+
+#    - name: Install the configparser
+#      pip: name=configparser
+#      tags: mysql
+
+#    - name: Install the Python MySQLB module
+#      pip: name=Mysql-python
+#      tags: mysql
+
+    - name: Start the MySQL service
+      action: service name=mysql state=started
+      tags: mysql
+
+    - name: enable service mysqld and ensure it is not masked
+      systemd:
+        name: mysql
+        enabled: yes
+        masked: no
+      tags: mysql
+
+    - name: Copy the configuration file (my.cnf)
+      template: src=my.cnf.j2 dest=/etc/mysql/mysql.cnf
+      notify:
+       - restart mysql
+      tags: mysqlc
+
+    - name: Update MySQL root password for all root accounts
+      mysql_user: name=root host={{ item }} password={{ mysql_root_pass }} state=present
+      with_items:
+        - "{{ ansible_hostname }}"
+        - 127.0.0.1
+        - ::1
+        - localhost
+      tags: mysqlc
+
+    - name: Copy the root credentials as .my.cnf file
+      template: src=root.cnf.j2 dest=~/.my.cnf mode=0600
+      tags: mysqlc
+
+    - name: Ensure Anonymous user(s) are not in the database
+      mysql_user: name='' host={{ item }} state=absent
+      with_items:
+        - localhost
+        - "{{ ansible_hostname }}"
+      tags: mysqlc
+
+    - name: Remove the test database
+      mysql_db: name=test state=absent
+      notify:
+        - restart mysql
+      tags: mysqlc

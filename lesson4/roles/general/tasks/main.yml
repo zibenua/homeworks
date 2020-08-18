@@ -1,0 +1,22 @@
+- name: ensure mc is at the latest version
+  yum:
+    name: mc
+    state: latest
+  tags: mc
+
+- name: ensure git is at the latest version
+  yum:
+    name: git
+    state: latest
+  tags: git
+
+- name: Set timezone
+  timezone:
+    name: Europe/Kiev
+  tags: mainconfig
+  
+- name: Update yum
+  apt:
+    name: '*'
+    state: latest
+  tags: mainconfig

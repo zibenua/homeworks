@@ -1,0 +1,12 @@
+- hosts: web
+  become:  
+    true
+  become_method: 
+    sudo
+  roles:
+   - general
+   - nginx
+   - mysql
+   - php-fpm
+   - site
+   

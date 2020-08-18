@@ -1,0 +1,74 @@
+- name: Creates directory
+  file:
+    path: /home/www/{{ hostname }}
+    state: directory
+    owner: www-data
+    group: www-data
+    mode: 0775
+    recurse: yes
+  tags: site
+
+- name: Download archive 
+  get_url:
+    url=https://aircooler.com.ua/{{ hostname }}.tar.gz
+    dest=/tmp/{{ hostname }}.tar.gz
+  tags: download-site
+
+- name: Extract site archive 
+  unarchive:
+    src: /tmp/{{ hostname }}.tar.gz
+    dest: /home/www/{{ hostname }}
+    copy: no
+  tags: copy-site
+
+- name: Add test.php
+  template:
+    src: files/test.php
+    dest: /home/www/{{ hostname }}/www
+    owner: www-data
+    group: www-data
+    mode: '0644'
+  tags: site
+
+
+- name: Replace main config
+  template: 
+    src: templates/config.php
+    dest: /home/www/{{ hostname }}/www/
+  tags: site
+
+- name: Replace admin config
+  template: 
+    src: templates/admin/config.php
+    dest: /home/www/{{ hostname }}/www/admin/
+  tags: site
+
+- name: Create database
+  mysql_db:
+    name={{ db_name }}
+    state=present
+  tags: site
+
+- name: Create database user
+  mysql_user:
+    name={{ db_user }}
+    password={{ db_password }}
+    priv={{ db_name }}.*:ALL
+    state=present
+  tags: site
+
+- name: copy mysql dump file
+  template:
+    src: files/{{ db_name }}.sql
+    dest: /tmp/{{ db_name }}.sql
+    owner: www-data
+    group: www-data
+    mode: '0644'
+  tags: site
+
+- name: Import file.sql similar to mysql -u <username> -p <password> < hostname.sql
+  mysql_db:
+    state: import
+    name: "{{ db_name }}"
+    target: /tmp/{{ db_name }}.sql
+  tags: site
