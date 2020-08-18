@@ -35,13 +35,13 @@
   template: 
     src: templates/config.php
     dest: /home/www/{{ hostname }}/www/
-  tags: site
+  tags: site-conf
 
 - name: Replace admin config
   template: 
     src: templates/admin/config.php
     dest: /home/www/{{ hostname }}/www/admin/
-  tags: site
+  tags: site-conf
 
 - name: Create database
   mysql_db:

@@ -1,9 +1,9 @@
 <?php
 // HTTP
-define('HTTP_SERVER', 'http://{{ hostname }}/');
+define('HTTP_SERVER', 'https://{{ hostname }}/');
 
 // HTTPS
-define('HTTPS_SERVER', 'http://{{ hostname }}/');
+define('HTTPS_SERVER', 'https://{{ hostname }}/');
 
 // DIR
 define('DIR_APPLICATION', '/home/www/{{ hostname }}/www/catalog/');

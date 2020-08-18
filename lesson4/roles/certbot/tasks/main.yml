@@ -1,0 +1,43 @@
+- name: install letsencrypt
+  package:
+    name: letsencrypt
+    state: latest
+  tags: certbot
+
+- name: Create letsencrypt certificate
+  shell: letsencrypt certonly -n --webroot -w /home/www/{{ hostname }}/www -m {{ letsencrypt_email }} --agree-tos -d {{ hostname }}
+  args:
+    creates: /etc/letsencrypt/live/{{ hostname }}
+  tags: certbot
+
+- name: Generate dhparams
+  shell: openssl dhparam -out /etc/nginx/dhparams.pem 2048
+  args:
+    creates: /etc/nginx/dhparams.pem
+  tags: certbot
+
+- name: Add letsencrypt cronjob for cert renewal
+  cron:
+    name: letsencrypt_renewal
+    special_time: weekly
+    job: letsencrypt --renew certonly -n --webroot -w /home/www/{{ hostname }}/www -m {{ letsencrypt_email }} --agree-tos -d {{ hostname }} && service nginx reload
+  tags: certbot
+
+
+- name: Add options-ssl-nginx.conf
+  template:
+    src: templates/options-ssl-nginx.conf
+    dest: /etc/letsencrypt/options-ssl-nginx.conf
+    mode: '0644'
+  tags: certbot
+
+
+- name: Add NGINX virtualhost config
+  template:
+    src: templates/nginx_vhost.conf
+    dest: /etc/nginx/sites-available/{{ hostname }}.conf
+    mode: '0644'
+  notify: 
+    - NGINX reload
+  tags: certbot
+
